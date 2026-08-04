@@ -9,6 +9,18 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+node_modules/
+dist/
+build/
+.env
+.env.local
+.DS_Store
+
+*.log
+.vscode/
+.idea/
+coverage/
+.eslintcache
 # Runtime data
 pids
 *.pid
