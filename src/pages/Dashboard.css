@@ -1,0 +1,138 @@
+.dash-topo {
+  padding: 2rem 2rem 0;
+}
+
+.dash-titulo {
+  font-size: 1.5rem;
+}
+
+.dash-subtitulo {
+  color: var(--tinta-suave);
+  font-size: 0.9rem;
+  margin: 0.3rem 0 0;
+}
+
+.dash-conteudo {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.dash-mensagem {
+  color: var(--tinta-suave);
+  font-size: 0.9rem;
+}
+
+.dash-erro {
+  color: var(--vermelho);
+  background: var(--vermelho-bg);
+  padding: 0.75rem 1rem;
+  border-radius: var(--raio);
+  font-size: 0.88rem;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.1rem;
+}
+
+.dash-card {
+  background: var(--branco);
+  border-radius: var(--raio-lg);
+  border: 1px solid var(--azul-100);
+  padding: 1.25rem;
+  box-shadow: var(--sombra);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.dash-card-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dash-card-icone {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--azul-100);
+  color: var(--azul-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dash-card-nome {
+  font-size: 1.02rem;
+  margin: 0;
+}
+
+.dash-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.dash-badge-ativo {
+  background: var(--verde-bg);
+  color: var(--verde);
+}
+
+.dash-badge-inativo {
+  background: var(--vermelho-bg);
+  color: var(--vermelho);
+}
+
+.dash-card-detalhes {
+  margin: 0;
+  border-top: 1px solid var(--azul-50);
+  padding-top: 0.7rem;
+}
+
+.dash-card-linha {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.3rem 0;
+  font-size: 0.85rem;
+}
+
+.dash-card-linha dt {
+  color: var(--tinta-suave);
+}
+
+.dash-card-linha dd {
+  margin: 0;
+  color: var(--tinta);
+  font-weight: 500;
+}
+
+.dash-tipo-pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.dash-tipo-semanal {
+  background: var(--azul-100);
+  color: var(--azul-800);
+}
+
+.dash-tipo-quinzenal {
+  background: var(--ambar-bg);
+  color: var(--ambar);
+}
+
+@media (max-width: 480px) {
+  .dash-topo,
+  .dash-conteudo {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+}

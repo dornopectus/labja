@@ -1,0 +1,69 @@
+:root {
+  --azul-900: #0f2e52;
+  --azul-800: #123a6b;
+  --azul-700: #1e5aa8;
+  --azul-500: #3d7dc4;
+  --azul-200: #cfe0f5;
+  --azul-100: #e3eefb;
+  --azul-50: #f5f9fe;
+
+  --tinta: #16233a;
+  --tinta-suave: #5b7189;
+  --tinta-fraca: #93a4b8;
+  --branco: #ffffff;
+
+  --verde: #1e8e5a;
+  --verde-bg: #e3f3ea;
+  --vermelho: #c0392b;
+  --vermelho-bg: #f7e6e4;
+  --ambar: #a8710b;
+  --ambar-bg: #faf1e0;
+
+  --raio: 10px;
+  --raio-lg: 16px;
+  --sombra: 0 2px 12px rgba(15, 46, 82, 0.07);
+
+  --fonte-titulo: 'Sora', system-ui, sans-serif;
+  --fonte-corpo: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  color: var(--tinta);
+  background: var(--azul-50);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fonte-titulo);
+  margin: 0;
+  color: var(--azul-900);
+}
+
+button {
+  font-family: var(--fonte-corpo);
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--azul-500);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--azul-200);
+}
