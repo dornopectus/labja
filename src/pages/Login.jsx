@@ -22,22 +22,18 @@ export default function Login() {
 
     setCarregando(true)
     try {
-      const { data, error } = await supabase
-        .from('professores')
-        .select('id, nome, materia, curso_tecnico')
-        .eq('login', login)
-        .single()
+      const { data, error } = await supabase.rpc('verificar_login', {
+        p_login: login,
+        p_senha: senha,
+      })
 
-      if (error || !data) {
+      if (error || !data || data.length === 0) {
         setErro('Login ou senha inválidos')
         return
       }
 
-      // TODO: validar senha_hash via função RPC segura no Supabase
-      // em vez de comparar no cliente.
-
-      setProfessorLogado(data)
-      navigate('/dashboard')
+      setProfessorLogado(data[0])
+      navigate('/home')
     } catch (err) {
       setErro('Erro ao conectar. Tente novamente.')
     } finally {

@@ -4,7 +4,7 @@
 -- ============================================================
 
 insert into horarios (dia_semana, bloco, hora_inicio, hora_fim)
-select dia, bloco, hora_inicio, hora_fim
+select dia, bloco, hora_inicio::time, hora_fim::time
 from (values
     (1, '1º horário', '07:30', '08:20'),
     (1, '2º horário', '08:20', '09:10'),
