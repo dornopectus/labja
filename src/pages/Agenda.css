@@ -161,3 +161,198 @@
   margin-left: 0.6rem;
 }
 
+
+/* ===== Calendário mensal ===== */
+
+.cal-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.cal-navegacao {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cal-nav-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--azul-200);
+  background: var(--branco);
+  color: var(--azul-700);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-nav-btn:hover {
+  background: var(--azul-50);
+}
+
+.cal-mes-nome {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--azul-900);
+  min-width: 140px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+  background: var(--branco);
+  border: 1px solid var(--azul-100);
+  border-radius: var(--raio-lg);
+  padding: 0.75rem;
+  box-shadow: var(--sombra);
+  max-width: 380px;
+}
+
+.cal-dia-semana-header {
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--tinta-suave);
+  text-transform: uppercase;
+  padding-bottom: 0.3rem;
+}
+
+.cal-dia {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--raio);
+  border: 1px solid transparent;
+  background: none;
+  font-family: var(--fonte-corpo);
+  font-size: 0.76rem;
+  color: var(--tinta);
+  cursor: pointer;
+  position: relative;
+}
+
+.cal-dia:hover:not(.cal-dia-desabilitado) {
+  background: var(--azul-50);
+}
+
+.cal-dia-vazio {
+  visibility: hidden;
+  cursor: default;
+}
+
+.cal-dia-desabilitado {
+  color: var(--tinta-fraca);
+  cursor: not-allowed;
+}
+
+.cal-dia-fim-semana {
+  background: #e4e9ef;
+  color: #9aa7b5;
+  cursor: not-allowed;
+}
+
+.cal-dia-hoje {
+  border-color: var(--azul-500);
+  font-weight: 700;
+}
+
+.cal-dia-selecionado {
+  background: var(--azul-700);
+  color: var(--branco);
+}
+
+.cal-dia-selecionado:hover {
+  background: var(--azul-800);
+}
+
+.cal-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 46, 82, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.cal-modal {
+  background: var(--branco);
+  border-radius: var(--raio-lg);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(15, 46, 82, 0.25);
+}
+
+.cal-modal-topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cal-modal-fechar {
+  border: none;
+  background: var(--azul-50);
+  color: var(--tinta-suave);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.cal-modal-fechar:hover {
+  background: var(--azul-100);
+}
+
+.cal-painel-titulo {
+  font-size: 0.95rem;
+  text-transform: capitalize;
+  margin: 0;
+}
+
+.cal-horarios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cal-horario-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--branco);
+  border: 1px solid var(--azul-100);
+  border-radius: var(--raio);
+  padding: 0.7rem 1rem;
+}
+
+.cal-horario-bloco {
+  font-size: 0.85rem;
+  color: var(--tinta);
+}
+
+.cal-horario-hora {
+  font-size: 0.75rem;
+  color: var(--tinta-suave);
+}

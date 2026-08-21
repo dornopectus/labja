@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import AgendaSecao from './AgendaSecao'
+import CalendarioReserva from '../components/CalendarioReserva'
 import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { periodoSemanalAtual, periodoQuinzenalAtual } from '../lib/periodos'
@@ -95,24 +95,10 @@ export default function Home() {
 
         {!carregando && !erro && (
           <>
-            <AgendaSecao
-              titulo="Laboratórios semanais"
-              tagClasse="agenda-secao-tag-semanal"
-              tagTexto="Semanal"
-              laboratorios={labsSemanais}
+            <CalendarioReserva
+              laboratoriosSemanais={labsSemanais}
+              laboratoriosQuinzenais={labsQuinzenais}
               horarios={horarios}
-              periodoReferencia={periodoSemanalAtual()}
-              laboratorioPrioritarioId={laboratorioPrioritarioId}
-              aoReservar={carregarReservas}
-            />
-
-            <AgendaSecao
-              titulo="Laboratório quinzenal"
-              tagClasse="agenda-secao-tag-quinzenal"
-              tagTexto="Quinzenal"
-              laboratorios={labsQuinzenais}
-              horarios={horarios}
-              periodoReferencia={periodoQuinzenalAtual()}
               laboratorioPrioritarioId={laboratorioPrioritarioId}
               aoReservar={carregarReservas}
             />
