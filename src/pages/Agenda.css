@@ -202,3 +202,90 @@
 .agenda-colapsavel-seta-aberta {
   transform: rotate(90deg);
 }
+
+.agenda-reserva-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 46, 82, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+}
+
+.agenda-reserva-modal {
+  background: var(--branco);
+  border-radius: var(--raio-lg);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 12px 40px rgba(15, 46, 82, 0.25);
+}
+
+.agenda-reserva-titulo {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.agenda-reserva-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--tinta);
+  margin-bottom: 0.4rem;
+}
+
+.agenda-reserva-aviso {
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+  background: var(--azul-50);
+  padding: 0.75rem;
+  border-radius: var(--raio);
+}
+
+.agenda-reserva-acoes {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.agenda-reserva-cancelar {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: var(--raio);
+  border: 1px solid var(--azul-200);
+  background: var(--branco);
+  color: var(--tinta-suave);
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.agenda-reserva-confirmar {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: var(--raio);
+  border: none;
+  background: var(--azul-700);
+  color: var(--branco);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.agenda-reserva-confirmar:hover {
+  background: var(--azul-800);
+}
+
+.agenda-reserva-confirmar:disabled {
+  background: var(--azul-200);
+  cursor: default;
+}
+
+.agenda-lab-unico {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--azul-900);
+  padding: 0.4rem 0;
+}

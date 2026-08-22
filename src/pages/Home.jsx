@@ -4,6 +4,7 @@ import AgendaSecao from './AgendaSecao'
 import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { periodoSemanalAtual, periodoQuinzenalAtual } from '../lib/periodos'
+import { sincronizarHoraServidor } from '../lib/horaServidor'
 import './Dashboard.css'
 import './Agenda.css'
 
@@ -15,6 +16,7 @@ export default function Home() {
   const [labsQuinzenais, setLabsQuinzenais] = useState([])
   const [horarios, setHorarios] = useState([])
   const [laboratorioPrioritarioId, setLaboratorioPrioritarioId] = useState(null)
+  const [turmasDoProfessor, setTurmasDoProfessor] = useState([])
   const [reservas, setReservas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -35,6 +37,8 @@ export default function Home() {
 
   useEffect(() => {
     async function carregarBase() {
+      await sincronizarHoraServidor()
+
       const [{ data: labs, error: erroLabs }, { data: hrs, error: erroHrs }] = await Promise.all([
         supabase
           .from('laboratorios')
@@ -74,6 +78,15 @@ export default function Home() {
         if (prioridade) setLaboratorioPrioritarioId(prioridade.laboratorio_id)
       }
 
+      if (professor?.id) {
+        const { data: turmas } = await supabase
+          .from('professor_turmas')
+          .select('turmas(id, nome)')
+          .eq('professor_id', professor.id)
+
+        setTurmasDoProfessor((turmas || []).map((t) => t.turmas).filter(Boolean))
+      }
+
       await carregarReservas()
       setCarregando(false)
     }
@@ -107,6 +120,7 @@ export default function Home() {
                   laboratorioPrioritarioId={laboratorioPrioritarioId}
                   mostrarAbasSemana
                   aoReservar={carregarReservas}
+                  turmasDoProfessor={turmasDoProfessor}
                 />
 
                 <AgendaSecao
@@ -121,6 +135,7 @@ export default function Home() {
                   colapsavel
                   abertaInicialmente={false}
                   aoReservar={carregarReservas}
+                  turmasDoProfessor={turmasDoProfessor}
                 />
               </>
             ) : (
@@ -134,6 +149,7 @@ export default function Home() {
                 laboratorioPrioritarioId={laboratorioPrioritarioId}
                 mostrarDatasReais
                 aoReservar={carregarReservas}
+                turmasDoProfessor={turmasDoProfessor}
               />
             )}
 

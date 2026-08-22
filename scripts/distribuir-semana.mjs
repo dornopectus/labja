@@ -33,23 +33,23 @@ if (!supabaseUrl || !serviceRoleKey) {
 const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 // ---- período de referência (mesma regra do site: reset sexta 18h) ----
+function paraISO(data) {
+  const ano = data.getFullYear()
+  const mes = String(data.getMonth() + 1).padStart(2, '0')
+  const dia = String(data.getDate()).padStart(2, '0')
+  return `${ano}-${mes}-${dia}`
+}
+
 function periodoSemanalAtual(agora = new Date()) {
-  const d = new Date(agora)
-  const diaSemana = d.getDay()
-  const horaAtual = d.getHours()
-  const jaResetou = diaSemana > 5 || (diaSemana === 5 && horaAtual >= 18)
+  const diaSemana = agora.getDay()
+  const horaAtual = agora.getHours()
+  const jaResetou = diaSemana === 0 || diaSemana === 6 || (diaSemana === 5 && horaAtual >= 18)
+  const diasDesdeSegunda = (diaSemana + 6) % 7
 
-  let deslocamento
-  if (diaSemana === 0) {
-    deslocamento = jaResetou ? 1 : -6
-  } else {
-    deslocamento = 1 - diaSemana
-  }
+  const segunda = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+  segunda.setDate(segunda.getDate() - diasDesdeSegunda + (jaResetou ? 7 : 0))
 
-  const segunda = new Date(d)
-  segunda.setDate(d.getDate() + deslocamento + (jaResetou && diaSemana !== 0 ? 7 : 0))
-  segunda.setHours(0, 0, 0, 0)
-  return segunda.toISOString().slice(0, 10)
+  return paraISO(segunda)
 }
 
 const ehCursoTecnico = (curso) => /t[ée]cnic/i.test(curso || '')
