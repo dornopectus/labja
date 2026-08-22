@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import CalendarioReserva from '../components/CalendarioReserva'
+import AgendaSecao from './AgendaSecao'
 import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { periodoSemanalAtual, periodoQuinzenalAtual } from '../lib/periodos'
@@ -95,13 +95,47 @@ export default function Home() {
 
         {!carregando && !erro && (
           <>
-            <CalendarioReserva
-              laboratoriosSemanais={labsSemanais}
-              laboratoriosQuinzenais={labsQuinzenais}
-              horarios={horarios}
-              laboratorioPrioritarioId={laboratorioPrioritarioId}
-              aoReservar={carregarReservas}
-            />
+            {professor?.curso_tecnico ? (
+              <>
+                <AgendaSecao
+                  titulo="Laboratório quinzenal"
+                  tagClasse="agenda-secao-tag-quinzenal"
+                  tagTexto="Quinzenal"
+                  laboratorios={labsQuinzenais}
+                  horarios={horarios}
+                  periodoReferencia={periodoQuinzenalAtual()}
+                  laboratorioPrioritarioId={laboratorioPrioritarioId}
+                  mostrarAbasSemana
+                  aoReservar={carregarReservas}
+                />
+
+                <AgendaSecao
+                  titulo="Laboratórios semanais"
+                  tagClasse="agenda-secao-tag-semanal"
+                  tagTexto="Semanal"
+                  laboratorios={labsSemanais}
+                  horarios={horarios}
+                  periodoReferencia={periodoSemanalAtual()}
+                  laboratorioPrioritarioId={laboratorioPrioritarioId}
+                  mostrarDatasReais
+                  colapsavel
+                  abertaInicialmente={false}
+                  aoReservar={carregarReservas}
+                />
+              </>
+            ) : (
+              <AgendaSecao
+                titulo="Laboratórios semanais"
+                tagClasse="agenda-secao-tag-semanal"
+                tagTexto="Semanal"
+                laboratorios={labsSemanais}
+                horarios={horarios}
+                periodoReferencia={periodoSemanalAtual()}
+                laboratorioPrioritarioId={laboratorioPrioritarioId}
+                mostrarDatasReais
+                aoReservar={carregarReservas}
+              />
+            )}
 
             <div className="agenda-secao">
               <h2 className="agenda-secao-titulo">Minhas reservas</h2>
