@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
-import { setProfessorLogado } from '../lib/auth'
+import { getProfessorLogado, setProfessorLogado } from '../lib/auth'
 import './Login.css'
 
 export default function Login() {
@@ -10,6 +10,14 @@ export default function Login() {
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
   const [carregando, setCarregando] = useState(false)
+
+  useEffect(() => {
+    const professor = getProfessorLogado()
+
+    if (professor) {
+      navigate('/home', { replace: true })
+    }
+  }, [navigate])
 
   async function handleSubmit(e) {
     e.preventDefault()
