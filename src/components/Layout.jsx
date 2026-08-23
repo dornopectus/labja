@@ -16,8 +16,11 @@ export default function Layout({ children }) {
     <div className="layout">
       <aside className="layout-sidebar">
         <div className="layout-marca">
-          <span className="layout-marca-quadrado">L</span>
-          <span className="layout-marca-nome">LabJá</span>
+          <img
+            className="layout-marca-logo"
+            src="/logo-full.png"
+            alt="LabJá"
+          />
         </div>
 
         {professor && (

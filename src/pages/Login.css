@@ -16,26 +16,12 @@
 .login-lado-marca-topo {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
 }
 
-.login-lado-marca-quadrado {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  background: var(--branco);
-  color: var(--azul-800);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--fonte-titulo);
-  font-weight: 700;
-}
-
-.login-lado-marca-nome {
-  font-family: var(--fonte-titulo);
-  font-weight: 700;
-  font-size: 1.2rem;
+.login-lado-marca-logo {
+  width: min(260px, 70%);
+  height: auto;
+  display: block;
 }
 
 .login-lado-marca-frase {

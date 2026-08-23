@@ -53,8 +53,11 @@ export default function Login() {
     <div className="login-pagina">
       <div className="login-lado-marca">
         <div className="login-lado-marca-topo">
-          <span className="login-lado-marca-quadrado">L</span>
-          <span className="login-lado-marca-nome">LabJá</span>
+          <img
+            className="login-lado-marca-logo"
+            src="/logo-full.png"
+            alt="LabJá"
+          />
         </div>
 
         <p className="login-lado-marca-frase">

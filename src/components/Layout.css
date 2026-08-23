@@ -17,29 +17,13 @@
 .layout-marca {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
   padding: 0 0.5rem;
 }
 
-.layout-marca-quadrado {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--azul-700);
-  color: var(--branco);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--fonte-titulo);
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.layout-marca-nome {
-  font-family: var(--fonte-titulo);
-  font-weight: 700;
-  font-size: 1.15rem;
-  color: var(--azul-900);
+.layout-marca-logo {
+  width: 150px;
+  height: auto;
+  display: block;
 }
 
 .layout-usuario {
