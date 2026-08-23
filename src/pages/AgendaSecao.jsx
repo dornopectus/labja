@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { agoraSincronizado } from '../lib/horaServidor'
 import { periodoSemanalAtual } from '../lib/periodos'
+import { obterAberturaMateria, mensagemAberturaMateria } from '../lib/aberturaLaboratorios'
 
 const NOMES_DIA = { 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex' }
 
@@ -111,13 +112,55 @@ export default function AgendaSecao({
     carregar()
   }, [laboratorioId, periodoReferencia])
 
-  function abrirReserva(horarioId) {
+  async function carregarPrioridadesLaboratorio() {
+    const { data } = await supabase
+      .from('prioridades_laboratorio')
+      .select('materia, ordem_prioridade, bloqueada')
+      .eq('laboratorio_id', laboratorioId)
+
+    return data || []
+  }
+
+  async function abrirReserva(horarioId) {
+    const laboratorio = laboratorios.find((lab) => lab.id === laboratorioId)
+
+    if (laboratorio?.tipo_agendamento === 'semanal' && professor?.materia && laboratorioId) {
+      const prioridadesAtuais = await carregarPrioridadesLaboratorio()
+      const abertura = obterAberturaMateria({
+        materia: professor.materia,
+        prioridades: prioridadesAtuais,
+        agora: agoraSincronizado(),
+      })
+
+      if (abertura && !abertura.liberada) {
+        window.alert(mensagemAberturaMateria(professor.materia, abertura))
+        return
+      }
+    }
+
     setTurmaEscolhida(turmasDoProfessor[0]?.nome ?? '')
     setHorarioEmReserva(horarioId)
   }
 
   async function confirmarReserva() {
     if (!turmaEscolhida) return
+
+    const laboratorio = laboratorios.find((lab) => lab.id === laboratorioId)
+
+    if (laboratorio?.tipo_agendamento === 'semanal' && professor?.materia && laboratorioId) {
+      const prioridadesAtuais = await carregarPrioridadesLaboratorio()
+      const abertura = obterAberturaMateria({
+        materia: professor.materia,
+        prioridades: prioridadesAtuais,
+        agora: agoraSincronizado(),
+      })
+
+      if (abertura && !abertura.liberada) {
+        window.alert(mensagemAberturaMateria(professor.materia, abertura))
+        setHorarioEmReserva(null)
+        return
+      }
+    }
 
     // Regra obrigatória do documento: algumas matérias são proibidas
     // em determinados laboratórios (ex.: Inglês não pode no Lab 4).

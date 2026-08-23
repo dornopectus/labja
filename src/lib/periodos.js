@@ -1,4 +1,5 @@
 import { agoraSincronizado } from './horaServidor'
+import { obterDataHoraBrasilia } from './fusoBrasilia'
 
 // Referência para o cálculo das janelas quinzenais (Lab 2).
 // Ajustar se o coordenador definir uma data de início oficial diferente.
@@ -20,13 +21,14 @@ function paraISO(data) {
  * sábado/domingo), já conta como a semana seguinte.
  */
 export function periodoSemanalAtual(agora = agoraSincronizado()) {
-  const diaSemana = agora.getDay() // 0=domingo ... 5=sexta ... 6=sábado
-  const horaAtual = agora.getHours()
+  const brasilia = obterDataHoraBrasilia(agora)
+  const diaSemana = brasilia.diaSemana // 0=domingo ... 5=sexta ... 6=sábado
+  const horaAtual = brasilia.hora
   const jaResetou = diaSemana === 0 || diaSemana === 6 || (diaSemana === 5 && horaAtual >= 18)
 
   const diasDesdeSegunda = (diaSemana + 6) % 7 // segunda=0 ... domingo=6
 
-  const segunda = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
+  const segunda = new Date(brasilia.ano, brasilia.mes - 1, brasilia.dia)
   segunda.setDate(segunda.getDate() - diasDesdeSegunda + (jaResetou ? 7 : 0))
 
   return paraISO(segunda)
