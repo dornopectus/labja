@@ -166,3 +166,24 @@
     display: none;
   }
 }
+
+
+@media (max-width: 900px) {
+  .login-lado-formulario {
+    padding: 2rem 1.25rem;
+  }
+
+  .login-lado-marca-logo {
+    width: min(240px, 72%);
+  }
+}
+
+@media (max-width: 600px) {
+  .login-lado-formulario {
+    padding: 1.5rem 1rem;
+  }
+
+  .login-lado-marca-logo {
+    width: min(210px, 70vw);
+  }
+}
