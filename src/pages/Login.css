@@ -5,7 +5,7 @@
 }
 
 .login-lado-marca {
-  background: linear-gradient(165deg, var(--azul-800), var(--azul-900));
+  background: linear-gradient(165deg, #071f3d, #041326);
   color: var(--branco);
   display: flex;
   flex-direction: column;
@@ -40,7 +40,7 @@
   padding: 0;
   margin: 0;
   font-size: 0.85rem;
-  color: var(--azul-200);
+  color: #b9d8f5;
 }
 
 .login-lado-marca-lista li {
@@ -54,7 +54,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--azul-500);
+  background: #2d78d0;
   flex-shrink: 0;
 }
 
@@ -103,16 +103,16 @@
 .login-campo input {
   padding: 0.7rem 0.85rem;
   border-radius: var(--raio);
-  border: 1px solid var(--azul-200);
+  border: 1px solid #b9d2ed;
   font-size: 0.95rem;
   font-family: var(--fonte-corpo);
-  background: var(--azul-50);
+  background: #f3f8fd;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .login-campo input:focus {
   outline: none;
-  border-color: var(--azul-500);
+  border-color: #2d78d0;
   background: var(--branco);
 }
 
@@ -130,7 +130,7 @@
   padding: 0.75rem;
   border-radius: var(--raio);
   border: none;
-  background: var(--azul-700);
+  background: #0b4f9c;
   color: var(--branco);
   font-size: 0.95rem;
   font-weight: 600;
@@ -139,11 +139,11 @@
 }
 
 .login-botao:hover {
-  background: var(--azul-800);
+  background: #083b75;
 }
 
 .login-botao:disabled {
-  background: var(--azul-200);
+  background: #b9d2ed;
   cursor: default;
 }
 
