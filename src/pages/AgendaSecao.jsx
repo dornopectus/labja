@@ -10,6 +10,7 @@ function formatarDataCurta(data) {
   return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 }
 
+
 function formatarHora(hora) {
   return hora ? hora.slice(0, 5) : ''
 }
@@ -73,11 +74,6 @@ export default function AgendaSecao({
   const semanaAtualMonday = mostrarAbasSemana ? periodoSemanalAtual() : null
   const abaPadrao = mostrarAbasSemana && semanaAtualMonday === semana1 ? 1 : 0
 
-  function rotuloIntervaloSemana(periodoInicioISO) {
-    const inicio = dataDoDiaSemana(periodoInicioISO, 1)
-    const fim = dataDoDiaSemana(periodoInicioISO, 5)
-    return `${formatarDataCurta(inicio)} – ${formatarDataCurta(fim)}`
-  }
 
   const [abaAtiva, setAbaAtiva] = useState(abaPadrao)
   const [aberta, setAberta] = useState(abertaInicialmente)
@@ -250,13 +246,13 @@ export default function AgendaSecao({
                 className={'agenda-aba' + (abaAtiva === 0 ? ' agenda-aba-ativa' : '')}
                 onClick={() => setAbaAtiva(0)}
               >
-                {rotuloIntervaloSemana(semana0)}
+                Essa Semana
               </button>
               <button
                 className={'agenda-aba' + (abaAtiva === 1 ? ' agenda-aba-ativa' : '')}
                 onClick={() => setAbaAtiva(1)}
               >
-                {rotuloIntervaloSemana(semana1)}
+                Semana que vem
               </button>
             </div>
           )}
