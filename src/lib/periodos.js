@@ -38,10 +38,19 @@ export function periodoSemanalAtual(agora = agoraSincronizado()) {
  * Usamos 14 em vez de 15 pra sempre alinhar numa segunda-feira —
  * 15 não é múltiplo de 7, então o início do período "escorregaria"
  * pros outros dias da semana a cada ciclo.
+ *
+ * Importante: calculamos a partir da segunda-feira da semana ATUAL
+ * (já ajustada pelo reset de sexta 18h), não da data crua de "agora".
+ * Isso evita um desalinhamento nos 3 dias finais de cada ciclo
+ * (sexta 18h até domingo), onde a semana já teria resetado mas a
+ * janela quinzenal ainda não.
  */
 export function periodoQuinzenalAtual(agora = agoraSincronizado()) {
-  const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate())
-  const diffDias = Math.round((hoje - EPOCA_QUINZENAL) / (1000 * 60 * 60 * 24))
+  const semanaAtualISO = periodoSemanalAtual(agora)
+  const [ano, mes, dia] = semanaAtualISO.split('-').map(Number)
+  const segundaAtual = new Date(ano, mes - 1, dia)
+
+  const diffDias = Math.round((segundaAtual - EPOCA_QUINZENAL) / (1000 * 60 * 60 * 24))
   const blocos = Math.floor(diffDias / 14)
 
   const inicioJanela = new Date(EPOCA_QUINZENAL)

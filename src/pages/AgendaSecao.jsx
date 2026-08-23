@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { agoraSincronizado } from '../lib/horaServidor'
+import { periodoSemanalAtual } from '../lib/periodos'
 
 const NOMES_DIA = { 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex' }
 
@@ -57,7 +58,23 @@ export default function AgendaSecao({
   const professor = getProfessorLogado()
   const [laboratorioId, setLaboratorioId] = useState('')
   const [agendamentos, setAgendamentos] = useState([])
-  const [abaAtiva, setAbaAtiva] = useState(0) // 0 = essa semana, 1 = semana que vem
+
+  // Uma reserva no quinzenal vale pro período inteiro (não é "só dessa
+  // semana"), então as abas mostram intervalos de data reais em vez de
+  // "essa semana"/"semana passada" — isso evitava dar a entender que uma
+  // aba era só consulta quando na real dá pra reservar nela também.
+  const semana0 = periodoReferencia
+  const semana1 = mostrarAbasSemana ? adicionarDiasISO(periodoReferencia, 7) : null
+  const semanaAtualMonday = mostrarAbasSemana ? periodoSemanalAtual() : null
+  const abaPadrao = mostrarAbasSemana && semanaAtualMonday === semana1 ? 1 : 0
+
+  function rotuloIntervaloSemana(periodoInicioISO) {
+    const inicio = dataDoDiaSemana(periodoInicioISO, 1)
+    const fim = dataDoDiaSemana(periodoInicioISO, 5)
+    return `${formatarDataCurta(inicio)} – ${formatarDataCurta(fim)}`
+  }
+
+  const [abaAtiva, setAbaAtiva] = useState(abaPadrao)
   const [aberta, setAberta] = useState(abertaInicialmente)
   const [horarioEmReserva, setHorarioEmReserva] = useState(null)
   const [turmaEscolhida, setTurmaEscolhida] = useState('')
@@ -96,6 +113,36 @@ export default function AgendaSecao({
 
   async function confirmarReserva() {
     if (!turmaEscolhida) return
+
+    // Regra obrigatória do documento: algumas matérias são proibidas
+    // em determinados laboratórios (ex.: Inglês não pode no Lab 4).
+    if (professor?.materia) {
+      const { data: bloqueio } = await supabase
+        .from('prioridades_laboratorio')
+        .select('bloqueada')
+        .eq('laboratorio_id', laboratorioId)
+        .ilike('materia', professor.materia)
+        .maybeSingle()
+
+      if (bloqueio?.bloqueada) {
+        const { data: alternativas } = await supabase
+          .from('vw_prioridade_professor')
+          .select('laboratorio_nome')
+          .ilike('materia', professor.materia)
+          .order('ordem_prioridade', { ascending: true })
+
+        const nomesAlternativos = [...new Set((alternativas || []).map((a) => a.laboratorio_nome))]
+        const sugestao =
+          nomesAlternativos.length > 0
+            ? `Laboratórios disponíveis para ${professor.materia}: ${nomesAlternativos.join(', ')}.`
+            : ''
+
+        window.alert(
+          `A disciplina "${professor.materia}" não pode ser reservada neste laboratório.\n${sugestao}`
+        )
+        return
+      }
+    }
 
     const { data, error } = await supabase
       .from('agendamentos')
@@ -194,13 +241,13 @@ export default function AgendaSecao({
                 className={'agenda-aba' + (abaAtiva === 0 ? ' agenda-aba-ativa' : '')}
                 onClick={() => setAbaAtiva(0)}
               >
-                Essa semana
+                {rotuloIntervaloSemana(semana0)}
               </button>
               <button
                 className={'agenda-aba' + (abaAtiva === 1 ? ' agenda-aba-ativa' : '')}
                 onClick={() => setAbaAtiva(1)}
               >
-                Semana que vem
+                {rotuloIntervaloSemana(semana1)}
               </button>
             </div>
           )}
@@ -236,7 +283,12 @@ export default function AgendaSecao({
                         const horario = horarios.find((h) => h.dia_semana === dia && h.bloco === bloco)
                         if (!horario) return <td key={dia}>—</td>
 
-                        const dataColuna = mostrarDatasReais ? dataDoDiaSemana(periodoReferencia, dia) : null
+                        const dataColuna =
+                          mostrarDatasReais
+                            ? dataDoDiaSemana(periodoReferencia, dia)
+                            : mostrarAbasSemana
+                            ? dataDoDiaSemana(periodoParaExibirDatas, dia)
+                            : null
                         const colunaPassada = dataColuna && ehPassado(dataColuna)
 
                         const agendamento = agendamentos.find((a) => a.horario_id === horario.id)

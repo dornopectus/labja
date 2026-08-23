@@ -16,6 +16,7 @@ export default function Home() {
   const [labsQuinzenais, setLabsQuinzenais] = useState([])
   const [horarios, setHorarios] = useState([])
   const [laboratorioPrioritarioId, setLaboratorioPrioritarioId] = useState(null)
+  const [laboratorioPrioritarioQuinzenalId, setLaboratorioPrioritarioQuinzenalId] = useState(null)
   const [turmasDoProfessor, setTurmasDoProfessor] = useState([])
   const [reservas, setReservas] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -62,20 +63,41 @@ export default function Home() {
         (l) => !l.exclusivo_curso_tecnico || professor?.curso_tecnico
       )
 
-      setLabsSemanais(labsVisiveis.filter((l) => l.tipo_agendamento === 'semanal'))
-      setLabsQuinzenais(labsVisiveis.filter((l) => l.tipo_agendamento === 'quinzenal'))
+      // Não mostra laboratórios onde a matéria do professor é proibida
+      // (ex.: professor de Inglês nem vê o Lab 4 na lista).
+      let labsPermitidos = labsVisiveis
+      if (professor?.materia) {
+        const { data: bloqueios } = await supabase
+          .from('prioridades_laboratorio')
+          .select('laboratorio_id')
+          .ilike('materia', professor.materia)
+          .eq('bloqueada', true)
+
+        const idsBloqueados = new Set((bloqueios || []).map((b) => b.laboratorio_id))
+        labsPermitidos = labsVisiveis.filter((l) => !idsBloqueados.has(l.id))
+      }
+
+      setLabsSemanais(labsPermitidos.filter((l) => l.tipo_agendamento === 'semanal'))
+      const quinzenaisPermitidos = labsPermitidos.filter((l) => l.tipo_agendamento === 'quinzenal')
+      setLabsQuinzenais(quinzenaisPermitidos)
       setHorarios(hrs || [])
 
       if (professor?.materia) {
         const { data: prioridade } = await supabase
           .from('vw_prioridade_professor')
           .select('laboratorio_id, ordem_prioridade')
-          .eq('materia', professor.materia)
+          .ilike('materia', professor.materia)
           .order('ordem_prioridade', { ascending: true })
           .limit(1)
           .maybeSingle()
 
         if (prioridade) setLaboratorioPrioritarioId(prioridade.laboratorio_id)
+      }
+
+      // Prioridade do Lab 2 (quinzenal) usa o campo booleano
+      // eh_desenvolvimento_sistemas, não comparação de texto na matéria.
+      if (professor?.eh_desenvolvimento_sistemas && quinzenaisPermitidos.length > 0) {
+        setLaboratorioPrioritarioQuinzenalId(quinzenaisPermitidos[0].id)
       }
 
       if (professor?.id) {
@@ -117,7 +139,7 @@ export default function Home() {
                   laboratorios={labsQuinzenais}
                   horarios={horarios}
                   periodoReferencia={periodoQuinzenalAtual()}
-                  laboratorioPrioritarioId={laboratorioPrioritarioId}
+                  laboratorioPrioritarioId={laboratorioPrioritarioQuinzenalId}
                   mostrarAbasSemana
                   aoReservar={carregarReservas}
                   turmasDoProfessor={turmasDoProfessor}
