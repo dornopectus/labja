@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Layout from '../components/Layout'
 import AgendaSecao from './AgendaSecao'
 import { supabase } from '../lib/supabaseClient'
@@ -21,6 +21,15 @@ export default function Home() {
   const [reservas, setReservas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
+  const [agoraTick, setAgoraTick] = useState(0)
+
+  const periodoSemanaAtual = useMemo(() => periodoSemanalAtual(), [agoraTick])
+  const periodoQuinzenaAtual = useMemo(() => periodoQuinzenalAtual(), [agoraTick])
+
+  useEffect(() => {
+    const intervalo = setInterval(() => setAgoraTick((valor) => valor + 1), 30_000)
+    return () => clearInterval(intervalo)
+  }, [])
 
   async function carregarReservas() {
     if (!professor?.id) return
@@ -31,7 +40,7 @@ export default function Home() {
       )
       .eq('professor_id', professor.id)
       .eq('status', 'confirmado')
-      .in('periodo_referencia', [periodoSemanalAtual(), periodoQuinzenalAtual()])
+      .in('periodo_referencia', [periodoSemanaAtual, periodoQuinzenaAtual])
 
     setReservas(data || [])
   }
@@ -39,6 +48,7 @@ export default function Home() {
   useEffect(() => {
     async function carregarBase() {
       await sincronizarHoraServidor()
+      setAgoraTick((valor) => valor + 1)
 
       const [{ data: labs, error: erroLabs }, { data: hrs, error: erroHrs }] = await Promise.all([
         supabase
@@ -109,13 +119,20 @@ export default function Home() {
         setTurmasDoProfessor((turmas || []).map((t) => t.turmas).filter(Boolean))
       }
 
-      await carregarReservas()
       setCarregando(false)
     }
 
     carregarBase()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [professor?.id, professor?.materia])
+
+  // Quando chega a sexta-feira às 18h, os períodos mudam automaticamente.
+  // Recarrega as reservas para acompanhar a nova semana/quinzena sem exigir F5.
+  useEffect(() => {
+    if (carregando || !professor?.id) return
+    carregarReservas()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodoSemanaAtual, periodoQuinzenaAtual, carregando, professor?.id])
 
   return (
     <Layout>
@@ -138,8 +155,9 @@ export default function Home() {
                   tagTexto="Quinzenal"
                   laboratorios={labsQuinzenais}
                   horarios={horarios}
-                  periodoReferencia={periodoQuinzenalAtual()}
+                  periodoReferencia={periodoQuinzenaAtual}
                   laboratorioPrioritarioId={laboratorioPrioritarioQuinzenalId}
+                  semanaBaseExibicao={professor?.eh_desenvolvimento_sistemas ? periodoSemanaAtual : undefined}
                   mostrarAbasSemana
                   aoReservar={carregarReservas}
                   turmasDoProfessor={turmasDoProfessor}
@@ -151,7 +169,7 @@ export default function Home() {
                   tagTexto="Semanal"
                   laboratorios={labsSemanais}
                   horarios={horarios}
-                  periodoReferencia={periodoSemanalAtual()}
+                  periodoReferencia={periodoSemanaAtual}
                   laboratorioPrioritarioId={laboratorioPrioritarioId}
                   mostrarDatasReais
                   colapsavel
@@ -167,7 +185,7 @@ export default function Home() {
                 tagTexto="Semanal"
                 laboratorios={labsSemanais}
                 horarios={horarios}
-                periodoReferencia={periodoSemanalAtual()}
+                periodoReferencia={periodoSemanaAtual}
                 laboratorioPrioritarioId={laboratorioPrioritarioId}
                 mostrarDatasReais
                 aoReservar={carregarReservas}

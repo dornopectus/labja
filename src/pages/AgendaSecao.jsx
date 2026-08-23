@@ -50,6 +50,7 @@ export default function AgendaSecao({
   laboratorioPrioritarioId,
   mostrarDatasReais,
   mostrarAbasSemana,
+  semanaBaseExibicao,
   colapsavel,
   abertaInicialmente = true,
   turmasDoProfessor = [],
@@ -63,8 +64,12 @@ export default function AgendaSecao({
   // semana"), então as abas mostram intervalos de data reais em vez de
   // "essa semana"/"semana passada" — isso evitava dar a entender que uma
   // aba era só consulta quando na real dá pra reservar nela também.
-  const semana0 = periodoReferencia
-  const semana1 = mostrarAbasSemana ? adicionarDiasISO(periodoReferencia, 7) : null
+  // Para o Lab 2/Desenvolvimento de Sistemas, a quinzena continua sendo
+  // a referência de reserva, mas o calendário visual precisa acompanhar
+  // a semana que está valendo agora (sexta 18h já aponta para a próxima).
+  // Isso evita mostrar como "Essa Semana" os dias da semana que acabou.
+  const semana0 = semanaBaseExibicao || periodoReferencia
+  const semana1 = mostrarAbasSemana ? adicionarDiasISO(semana0, 7) : null
   const semanaAtualMonday = mostrarAbasSemana ? periodoSemanalAtual() : null
   const abaPadrao = mostrarAbasSemana && semanaAtualMonday === semana1 ? 1 : 0
 
@@ -79,8 +84,12 @@ export default function AgendaSecao({
   const [horarioEmReserva, setHorarioEmReserva] = useState(null)
   const [turmaEscolhida, setTurmaEscolhida] = useState('')
 
+  useEffect(() => {
+    setAbaAtiva(abaPadrao)
+  }, [abaPadrao])
+
   const periodoParaExibirDatas = mostrarAbasSemana
-    ? adicionarDiasISO(periodoReferencia, abaAtiva * 7)
+    ? adicionarDiasISO(semana0, abaAtiva * 7)
     : periodoReferencia
 
   useEffect(() => {
