@@ -63,12 +63,6 @@ export default function Login() {
         <p className="login-lado-marca-frase">
           Gestão dos laboratórios do Colégio Suplicy, num só lugar.
         </p>
-
-        <ul className="login-lado-marca-lista">
-          <li>5 laboratórios: desktops, notebooks, Chromebooks e tablets</li>
-          <li>Agendamento semanal e quinzenal por prioridade</li>
-          <li>Controle de equipamentos e ocorrências</li>
-        </ul>
       </div>
 
       <div className="login-lado-form">

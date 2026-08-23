@@ -32,32 +32,6 @@
   max-width: 26ch;
 }
 
-.login-lado-marca-lista {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.85rem;
-  color: #b9d8f5;
-}
-
-.login-lado-marca-lista li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.login-lado-marca-lista li::before {
-  content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #2d78d0;
-  flex-shrink: 0;
-}
-
 .login-lado-form {
   display: flex;
   align-items: center;
