@@ -1,6 +1,6 @@
 # LabJá
 
-Sistema web de gestão e reserva dos laboratórios do Colégio Suplicy.
+Sistema web de gestão e reserva dos laboratórios.
 
 ## Desenvolvimento
 
@@ -9,15 +9,8 @@ npm install
 npm run dev
 ```
 
-Crie `.env` a partir de `.env.example`.
+A aplicação usa Supabase e calcula as janelas de calendário pelo fuso `America/Sao_Paulo`.
 
-## Banco
+## Administração
 
-O schema limpo está em `supabase/schema_limpo.sql`.
-Ele recria a estrutura atual e adiciona a tabela `administradores` para definir quais professores têm acesso à central administrativa.
-
-## Rotas
-
-- `/` — login
-- `/home` — agenda do professor
-- `/admin` — central administrativa (somente administradores)
+Administradores são contas separadas dos professores e entram em `/admin`. A criação de administradores permanece manual no banco; professores, turmas, disciplinas, laboratórios, horários, prioridades e reservas são administrados pela interface web.

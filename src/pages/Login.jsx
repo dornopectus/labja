@@ -15,7 +15,7 @@ export default function Login() {
     const professor = getProfessorLogado()
 
     if (professor) {
-      navigate('/home', { replace: true })
+      navigate(professor.eh_admin ? '/admin' : '/home', { replace: true })
     }
   }, [navigate])
 
@@ -41,7 +41,7 @@ export default function Login() {
       }
 
       setProfessorLogado(data[0])
-      navigate('/home')
+      navigate(data[0].eh_admin ? '/admin' : '/home')
     } catch (err) {
       setErro('Erro ao conectar. Tente novamente.')
     } finally {

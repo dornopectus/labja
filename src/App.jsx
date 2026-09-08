@@ -3,7 +3,6 @@ import Login from './pages/Login'
 import Home from './pages/Home'
 import Admin from './pages/Admin'
 import RotaProtegida from './components/RotaProtegida'
-import RotaAdmin from './components/RotaAdmin'
 
 function App() {
   return (
@@ -21,9 +20,9 @@ function App() {
         <Route
           path="/admin"
           element={
-            <RotaAdmin>
+            <RotaProtegida>
               <Admin />
-            </RotaAdmin>
+            </RotaProtegida>
           }
         />
       </Routes>

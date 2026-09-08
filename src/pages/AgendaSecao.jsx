@@ -114,8 +114,8 @@ export default function AgendaSecao({
 
   async function carregarPrioridadesLaboratorio() {
     const { data } = await supabase
-      .from('prioridades_laboratorio')
-      .select('disciplina_id, ordem_prioridade, bloqueada, disciplinas(nome)')
+      .from('vw_prioridade_professor')
+      .select('materia, ordem_prioridade, bloqueada')
       .eq('laboratorio_id', laboratorioId)
 
     return data || []
@@ -138,7 +138,7 @@ export default function AgendaSecao({
       }
     }
 
-    setTurmaEscolhida(turmasDoProfessor[0]?.nome ?? '')
+    setTurmaEscolhida(turmasDoProfessor[0]?.id ?? '')
     setHorarioEmReserva(horarioId)
   }
 
@@ -166,11 +166,10 @@ export default function AgendaSecao({
     // em determinados laboratórios (ex.: Inglês não pode no Lab 4).
     if (professor?.materia) {
       const { data: bloqueio } = await supabase
-        .from('prioridades_laboratorio')
+        .from('vw_prioridade_professor')
         .select('bloqueada')
         .eq('laboratorio_id', laboratorioId)
-        .eq('bloqueada', true)
-        .eq('disciplina_id', professor?.disciplina_id)
+        .ilike('materia', professor.materia)
         .maybeSingle()
 
       if (bloqueio?.bloqueada) {
@@ -199,7 +198,7 @@ export default function AgendaSecao({
         laboratorio_id: laboratorioId,
         professor_id: professor?.id,
         horario_id: horarioEmReserva,
-        turma_id: turmasDoProfessor.find((t) => t.nome === turmaEscolhida)?.id,
+        turma_id: turmaEscolhida,
         periodo_referencia: periodoReferencia,
       })
       .select('id, horario_id, turma_id, professor_id, turmas(nome)')
@@ -348,7 +347,7 @@ export default function AgendaSecao({
                             {agendamento ? (
                               ehMinha ? (
                                 <span className="agenda-celula-minha">
-                                  {agendamento.turmas?.nome ?? 'Turma'}
+                                  {agendamento.turmas?.nome}
                                   <button
                                     className="agenda-cancelar-btn"
                                     onClick={() => cancelar(agendamento.id)}
@@ -358,7 +357,7 @@ export default function AgendaSecao({
                                   </button>
                                 </span>
                               ) : (
-                                <span className="agenda-celula-ocupada">{agendamento.turmas?.nome ?? 'Turma'}</span>
+                                <span className="agenda-celula-ocupada">{agendamento.turmas?.nome}</span>
                               )
                             ) : colunaPassada ? (
                               <span style={{ color: 'var(--tinta-fraca)', fontSize: '0.78rem' }}>—</span>
@@ -401,7 +400,7 @@ export default function AgendaSecao({
                   onChange={(e) => setTurmaEscolhida(e.target.value)}
                 >
                   {turmasDoProfessor.map((t) => (
-                    <option key={t.id} value={t.nome}>
+                    <option key={t.id} value={t.id}>
                       {t.nome}
                     </option>
                   ))}
