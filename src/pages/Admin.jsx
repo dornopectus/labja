@@ -7,7 +7,7 @@ import './Admin.css'
 
 const DIAS = [
   [1, 'Segunda'], [2, 'Terça'], [3, 'Quarta'], [4, 'Quinta'],
-  [5, 'Sexta'], [6, 'Sábado'], [7, 'Domingo'],
+  [5, 'Sexta'],
 ]
 const ABAS = [
   ['resumo', 'Resumo'], ['professores', 'Professores'], ['turmas', 'Turmas'],

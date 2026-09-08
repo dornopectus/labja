@@ -147,7 +147,12 @@ export default function Home() {
 
         {!carregando && !erro && (
           <>
-            {professor?.curso_tecnico ? (
+            {horarios.length === 0 ? (
+              <div className="agenda-secao">
+                <h2 className="agenda-secao-titulo">Calendário</h2>
+                <p className="dash-mensagem">Nenhum horário foi cadastrado ainda. Cadastre os horários no banco para liberar o calendário de reservas.</p>
+              </div>
+            ) : professor?.curso_tecnico ? (
               <>
                 <AgendaSecao
                   titulo="Laboratório quinzenal"
