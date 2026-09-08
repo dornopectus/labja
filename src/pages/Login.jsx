@@ -42,7 +42,7 @@ export default function Login() {
 
       setProfessorLogado(data[0])
       navigate(data[0].eh_admin ? '/admin' : '/home')
-    } catch (err) {
+    } catch {
       setErro('Erro ao conectar. Tente novamente.')
     } finally {
       setCarregando(false)

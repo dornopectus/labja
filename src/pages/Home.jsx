@@ -54,7 +54,7 @@ export default function Home() {
       const [{ data: labs, error: erroLabs }, { data: hrs, error: erroHrs }] = await Promise.all([
         supabase
           .from('laboratorios')
-          .select('id, nome, tipo_agendamento, exclusivo_curso_tecnico')
+          .select('id, nome, tipo_agendamento, exclusivo_curso_tecnico, capacidade')
           .eq('ativo', true)
           .order('nome'),
         supabase

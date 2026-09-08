@@ -270,6 +270,8 @@ export default function AgendaSecao({
         window.alert(
           `A disciplina "${professor.materia}" não pode ser reservada neste laboratório.\n${sugestao}`
         )
+        setHorarioEmReserva(null)
+        setDataAulaEmReserva(null)
         return
       }
     }
