@@ -70,9 +70,16 @@ export default function Home() {
         return
       }
 
-      const labsVisiveis = (labs || []).filter(
-        (l) => !l.exclusivo_curso_tecnico || professor?.curso_tecnico
-      )
+      const labsVisiveis = (labs || []).filter((l) => {
+        if (l.tipo_agendamento === 'quinzenal') {
+          return Boolean(professor?.eh_desenvolvimento_sistemas)
+        }
+        if (l.exclusivo_curso_tecnico) {
+          return Boolean(professor?.curso_tecnico)
+        }
+        return true
+      })
+
 
       // Não mostra laboratórios onde a matéria do professor é proibida
       // (ex.: professor de Inglês nem vê o Lab 4 na lista).
@@ -89,7 +96,7 @@ export default function Home() {
       }
 
       setLabsSemanais(labsPermitidos.filter((l) => l.tipo_agendamento === 'semanal'))
-      const quinzenaisPermitidos = labsPermitidos.filter((l) => l.tipo_agendamento === 'quinzenal')
+      const quinzenaisPermitidos = labsPermitidos.filter((l) => l.tipo_agendamento === 'quinzenal' && professor?.eh_desenvolvimento_sistemas)
       setLabsQuinzenais(quinzenaisPermitidos)
       setHorarios(hrs || [])
 
@@ -114,7 +121,7 @@ export default function Home() {
       if (professor?.id) {
         const { data: turmas } = await supabase
           .from('professor_turmas')
-          .select('turmas(id, nome)')
+          .select('turmas(id, nome, quantidade_estudantes)')
           .eq('professor_id', professor.id)
 
         setTurmasDoProfessor((turmas || []).map((t) => t.turmas).filter(Boolean))
@@ -167,7 +174,7 @@ export default function Home() {
                 <h2 className="agenda-secao-titulo">Calendário</h2>
                 <p className="dash-mensagem">Nenhum horário foi cadastrado ainda. Cadastre os horários no banco para liberar o calendário de reservas.</p>
               </div>
-            ) : professor?.curso_tecnico ? (
+            ) : professor?.eh_desenvolvimento_sistemas ? (
               <>
                 <AgendaSecao
                   titulo="Laboratório quinzenal"

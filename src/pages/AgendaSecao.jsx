@@ -140,6 +140,30 @@ export default function AgendaSecao({
     return data || []
   }
 
+  function motivoIncompatibilidadeTurma(turmaId) {
+    const turma = turmasDoProfessor.find((item) => item.id === turmaId)
+    const laboratorio = laboratorios.find((lab) => lab.id === laboratorioId)
+    if (!turma || !laboratorio) return 'Turma ou laboratório não encontrado.'
+
+    const alunos = Number(turma.quantidade_estudantes)
+    const capacidade = Number(laboratorio.capacidade)
+
+    if (!Number.isFinite(alunos) || alunos <= 0) {
+      return 'A quantidade de estudantes desta turma ainda não foi cadastrada.'
+    }
+    if (!Number.isFinite(capacidade) || capacidade < 0) {
+      return 'A capacidade deste laboratório está inválida.'
+    }
+    if (alunos > capacidade) {
+      return `A turma possui ${alunos} alunos, mas o laboratório comporta no máximo ${capacidade}.`
+    }
+    return ''
+  }
+
+  function turmaCompativelComLaboratorio(turmaId) {
+    return motivoIncompatibilidadeTurma(turmaId) === ''
+  }
+
   async function abrirReserva(horarioId) {
     const horario = horarios.find((item) => item.id === horarioId)
     if (!horario) return
@@ -166,13 +190,33 @@ export default function AgendaSecao({
       }
     }
 
-    setTurmaEscolhida(turmasDoProfessor[0]?.id ?? '')
+    const turmasCompativeis = turmasDoProfessor.filter((turma) => turmaCompativelComLaboratorio(turma.id))
+    if (turmasCompativeis.length === 0) {
+      const motivo = turmasDoProfessor[0] ? motivoIncompatibilidadeTurma(turmasDoProfessor[0].id) : ''
+      window.alert(motivo || `Nenhuma das suas turmas é compatível com este laboratório.`)
+      return
+    }
+
+    setTurmaEscolhida((atual) =>
+      turmasCompativeis.some((turma) => turma.id === atual) ? atual : turmasCompativeis[0].id
+    )
     setDataAulaEmReserva(dataDoDiaSemana(periodoParaExibirDatas, Number(horario.dia_semana)))
     setHorarioEmReserva(horarioId)
   }
 
   async function confirmarReserva() {
     if (!turmaEscolhida) return
+
+    const turmaAtual = turmasDoProfessor.find((turma) => turma.id === turmaEscolhida)
+    const incompatibilidade = motivoIncompatibilidadeTurma(turmaEscolhida)
+    if (incompatibilidade) {
+      window.alert(
+        turmaAtual?.nome
+          ? `Não é possível reservar para a turma ${turmaAtual.nome}: ${incompatibilidade}`
+          : incompatibilidade
+      )
+      return
+    }
 
     const horario = horarios.find((item) => item.id === horarioEmReserva)
     if (!horario || !diasPermitidos.has(Number(horario.dia_semana))) {
@@ -237,6 +281,33 @@ export default function AgendaSecao({
       return
     }
 
+    // Verifica conflitos pela data real antes do INSERT. Assim o professor
+    // recebe uma mensagem útil em vez do erro bruto do índice UNIQUE.
+    const { data: conflitoData, error: conflitoError } = await supabase
+      .from('agendamentos')
+      .select('id, laboratorio_id, professor_id, turma_id, laboratorios(nome), professores(nome), turmas(nome)')
+      .eq('horario_id', horarioEmReserva)
+      .eq('data_aula', dataAulaEmReserva)
+      .neq('status', 'cancelado')
+      .or(`laboratorio_id.eq.${laboratorioId},professor_id.eq.${professor?.id},turma_id.eq.${turmaEscolhida}`)
+
+    if (conflitoError) {
+      window.alert('Não foi possível verificar se o horário está livre: ' + conflitoError.message)
+      return
+    }
+
+    if (conflitoData?.length) {
+      const conflito = conflitoData[0]
+      if (conflito.turma_id === turmaEscolhida) {
+        window.alert(`A turma ${conflito.turmas?.nome ?? 'selecionada'} já possui uma reserva nesse dia e horário.`)
+      } else if (conflito.professor_id === professor?.id) {
+        window.alert('Você já possui uma reserva nesse dia e horário.')
+      } else {
+        window.alert(`O ${conflito.laboratorios?.nome ?? 'laboratório'} já está reservado nesse horário.`)
+      }
+      return
+    }
+
     const { data, error } = await supabase
       .from('agendamentos')
       .insert({
@@ -251,7 +322,11 @@ export default function AgendaSecao({
       .single()
 
     if (error) {
-      window.alert('Não foi possível reservar: ' + error.message)
+      if (error.code === '23505') {
+        window.alert('Esse horário acabou de ser ocupado ou já existe uma reserva para a mesma turma. Atualize a agenda e escolha outro horário.')
+      } else {
+        window.alert('Não foi possível reservar: ' + error.message)
+      }
       return
     }
 
@@ -460,11 +535,14 @@ export default function AgendaSecao({
                   value={turmaEscolhida}
                   onChange={(e) => setTurmaEscolhida(e.target.value)}
                 >
-                  {turmasDoProfessor.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.nome}
-                    </option>
-                  ))}
+                  {turmasDoProfessor.map((t) => {
+                    const incompatibilidade = motivoIncompatibilidadeTurma(t.id)
+                    return (
+                      <option key={t.id} value={t.id} disabled={Boolean(incompatibilidade)}>
+                        {t.nome}{incompatibilidade ? ' — indisponível neste laboratório' : ''}
+                      </option>
+                    )
+                  })}
                 </select>
               </>
             )}
