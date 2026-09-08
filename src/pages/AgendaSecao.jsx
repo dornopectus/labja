@@ -90,6 +90,7 @@ export default function AgendaSecao({
   const [abaAtiva, setAbaAtiva] = useState(abaPadrao)
   const [aberta, setAberta] = useState(abertaInicialmente)
   const [horarioEmReserva, setHorarioEmReserva] = useState(null)
+  const [dataAulaEmReserva, setDataAulaEmReserva] = useState(null)
   const [turmaEscolhida, setTurmaEscolhida] = useState('')
   const diasPermitidos = new Set((diasDoProfessor || []).map(Number).filter((dia) => dia >= 1 && dia <= 5))
 
@@ -113,7 +114,7 @@ export default function AgendaSecao({
     async function carregar() {
       const { data, error } = await supabase
         .from('agendamentos')
-        .select('id, horario_id, turma_id, professor_id, turmas(nome)')
+        .select('id, horario_id, turma_id, professor_id, data_aula, turmas(nome)')
         .eq('laboratorio_id', laboratorioId)
         .eq('periodo_referencia', periodoReferencia)
         .eq('status', 'confirmado')
@@ -160,6 +161,7 @@ export default function AgendaSecao({
     }
 
     setTurmaEscolhida(turmasDoProfessor[0]?.id ?? '')
+    setDataAulaEmReserva(dataDoDiaSemana(periodoParaExibirDatas, Number(horario.dia_semana)))
     setHorarioEmReserva(horarioId)
   }
 
@@ -170,6 +172,7 @@ export default function AgendaSecao({
     if (!horario || !diasPermitidos.has(Number(horario.dia_semana))) {
       window.alert('Você não pode reservar nesse dia, pois ele não está cadastrado como seu dia de aula.')
       setHorarioEmReserva(null)
+      setDataAulaEmReserva(null)
       return
     }
 
@@ -186,6 +189,7 @@ export default function AgendaSecao({
       if (abertura && !abertura.liberada) {
         window.alert(mensagemAberturaMateria(professor.materia, abertura))
         setHorarioEmReserva(null)
+        setDataAulaEmReserva(null)
         return
       }
     }
@@ -220,6 +224,13 @@ export default function AgendaSecao({
       }
     }
 
+    if (!dataAulaEmReserva) {
+      window.alert('Não foi possível determinar a data da aula. Feche a janela e tente novamente.')
+      setHorarioEmReserva(null)
+      setDataAulaEmReserva(null)
+      return
+    }
+
     const { data, error } = await supabase
       .from('agendamentos')
       .insert({
@@ -227,9 +238,10 @@ export default function AgendaSecao({
         professor_id: professor?.id,
         horario_id: horarioEmReserva,
         turma_id: turmaEscolhida,
+        data_aula: dataAulaEmReserva,
         periodo_referencia: periodoReferencia,
       })
-      .select('id, horario_id, turma_id, professor_id, turmas(nome)')
+      .select('id, horario_id, turma_id, professor_id, data_aula, turmas(nome)')
       .single()
 
     if (error) {
@@ -239,6 +251,7 @@ export default function AgendaSecao({
 
     setAgendamentos((atual) => [...atual, data])
     setHorarioEmReserva(null)
+    setDataAulaEmReserva(null)
     aoReservar?.()
   }
 
@@ -375,7 +388,10 @@ export default function AgendaSecao({
                             : null
                         const colunaPassada = dataColuna && ehPassado(dataColuna)
 
-                        const agendamento = agendamentos.find((a) => a.horario_id === horario.id)
+                        const agendamento = agendamentos.find((a) => {
+          if (a.horario_id !== horario.id) return false
+          return !a.data_aula || a.data_aula === dataColuna
+        })
                         const ehMinha = agendamento && agendamento.professor_id === professor?.id
                         const diaPermitido = diasPermitidos.has(Number(horario.dia_semana))
 
@@ -416,7 +432,7 @@ export default function AgendaSecao({
       )}
 
       {horarioEmReserva && (
-        <div className="agenda-reserva-overlay" onClick={() => setHorarioEmReserva(null)}>
+        <div className="agenda-reserva-overlay" onClick={() => { setHorarioEmReserva(null); setDataAulaEmReserva(null) }}>
           <div className="agenda-reserva-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="agenda-reserva-titulo">Reservar horário</h3>
 
@@ -446,7 +462,7 @@ export default function AgendaSecao({
             )}
 
             <div className="agenda-reserva-acoes">
-              <button className="agenda-reserva-cancelar" onClick={() => setHorarioEmReserva(null)}>
+              <button className="agenda-reserva-cancelar" onClick={() => { setHorarioEmReserva(null); setDataAulaEmReserva(null) }}>
                 Voltar
               </button>
               <button
