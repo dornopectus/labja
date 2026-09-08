@@ -200,7 +200,7 @@ export default function AgendaSecao({
     setTurmaEscolhida((atual) =>
       turmasCompativeis.some((turma) => turma.id === atual) ? atual : turmasCompativeis[0].id
     )
-    setDataAulaEmReserva(dataDoDiaSemana(periodoParaExibirDatas, Number(horario.dia_semana)))
+    setDataAulaEmReserva(dataISO(dataDoDiaSemana(periodoParaExibirDatas, Number(horario.dia_semana))))
     setHorarioEmReserva(horarioId)
   }
 
