@@ -36,7 +36,7 @@ export default function Home() {
     const { data } = await supabase
       .from('agendamentos')
       .select(
-        'id, turma, periodo_referencia, laboratorios(nome), horarios(dia_semana, bloco, hora_inicio, hora_fim)'
+        'id, turma_id, periodo_referencia, turmas(nome), laboratorios(nome), horarios(dia_semana, bloco, hora_inicio, hora_fim)'
       )
       .eq('professor_id', professor.id)
       .eq('status', 'confirmado')
@@ -80,7 +80,7 @@ export default function Home() {
         const { data: bloqueios } = await supabase
           .from('prioridades_laboratorio')
           .select('laboratorio_id')
-          .ilike('materia', professor.materia)
+          .eq('disciplina_id', professor?.disciplina_id)
           .eq('bloqueada', true)
 
         const idsBloqueados = new Set((bloqueios || []).map((b) => b.laboratorio_id))
@@ -203,7 +203,7 @@ export default function Home() {
                   {reservas.map((r) => (
                     <div key={r.id} className="dash-reserva-item">
                       <div className="dash-reserva-info">
-                        <span className="dash-reserva-turma">{r.turma}</span>
+                        <span className="dash-reserva-turma">{r.turmas?.nome ?? 'Turma'}</span>
                         <span className="dash-reserva-detalhe">{r.laboratorios?.nome}</span>
                       </div>
                       <span className="dash-reserva-quando">

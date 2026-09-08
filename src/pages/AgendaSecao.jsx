@@ -101,7 +101,7 @@ export default function AgendaSecao({
     async function carregar() {
       const { data, error } = await supabase
         .from('agendamentos')
-        .select('id, horario_id, turma, professor_id')
+        .select('id, horario_id, turma_id, professor_id, turmas(nome)')
         .eq('laboratorio_id', laboratorioId)
         .eq('periodo_referencia', periodoReferencia)
         .eq('status', 'confirmado')
@@ -115,7 +115,7 @@ export default function AgendaSecao({
   async function carregarPrioridadesLaboratorio() {
     const { data } = await supabase
       .from('prioridades_laboratorio')
-      .select('materia, ordem_prioridade, bloqueada')
+      .select('disciplina_id, ordem_prioridade, bloqueada, disciplinas(nome)')
       .eq('laboratorio_id', laboratorioId)
 
     return data || []
@@ -169,7 +169,8 @@ export default function AgendaSecao({
         .from('prioridades_laboratorio')
         .select('bloqueada')
         .eq('laboratorio_id', laboratorioId)
-        .ilike('materia', professor.materia)
+        .eq('bloqueada', true)
+        .eq('disciplina_id', professor?.disciplina_id)
         .maybeSingle()
 
       if (bloqueio?.bloqueada) {
@@ -198,10 +199,10 @@ export default function AgendaSecao({
         laboratorio_id: laboratorioId,
         professor_id: professor?.id,
         horario_id: horarioEmReserva,
-        turma: turmaEscolhida,
+        turma_id: turmasDoProfessor.find((t) => t.nome === turmaEscolhida)?.id,
         periodo_referencia: periodoReferencia,
       })
-      .select()
+      .select('id, horario_id, turma_id, professor_id, turmas(nome)')
       .single()
 
     if (error) {
@@ -347,7 +348,7 @@ export default function AgendaSecao({
                             {agendamento ? (
                               ehMinha ? (
                                 <span className="agenda-celula-minha">
-                                  {agendamento.turma}
+                                  {agendamento.turmas?.nome ?? 'Turma'}
                                   <button
                                     className="agenda-cancelar-btn"
                                     onClick={() => cancelar(agendamento.id)}
@@ -357,7 +358,7 @@ export default function AgendaSecao({
                                   </button>
                                 </span>
                               ) : (
-                                <span className="agenda-celula-ocupada">{agendamento.turma}</span>
+                                <span className="agenda-celula-ocupada">{agendamento.turmas?.nome ?? 'Turma'}</span>
                               )
                             ) : colunaPassada ? (
                               <span style={{ color: 'var(--tinta-fraca)', fontSize: '0.78rem' }}>—</span>

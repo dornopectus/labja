@@ -7,13 +7,16 @@ export function setProfessorLogado(professor) {
 export function getProfessorLogado() {
   const bruto = localStorage.getItem(CHAVE)
   if (!bruto) return null
-
   try {
     return JSON.parse(bruto)
   } catch {
     localStorage.removeItem(CHAVE)
     return null
   }
+}
+
+export function isAdmin() {
+  return getProfessorLogado()?.eh_admin === true
 }
 
 export function logout() {

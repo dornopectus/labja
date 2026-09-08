@@ -1,18 +1,11 @@
-import { NavLink, useLocation, useNavigate } from 'react-router-dom'
-import { IconGrid, IconLogout } from './icons'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { IconLogout, IconGrid, IconCalendar, IconBuilding } from './icons'
 import { getProfessorLogado, logout } from '../lib/auth'
 import './Layout.css'
 
 export default function Layout({ children }) {
   const navigate = useNavigate()
   const professor = getProfessorLogado()
-  const location = useLocation()
-  const ehAdmin = Boolean(
-    professor?.eh_admin || professor?.is_admin || professor?.administrador ||
-      ['admin', 'administrador', 'coordenador'].includes(String(professor?.perfil ?? '').toLowerCase()) ||
-      ['admin', 'administrador', 'coordenador'].includes(String(professor?.role ?? '').toLowerCase()) ||
-      ['admin', 'administrador', 'coordenador'].includes(String(professor?.tipo_usuario ?? '').toLowerCase())
-  )
 
   function handleSair() {
     logout()
@@ -23,11 +16,7 @@ export default function Layout({ children }) {
     <div className="layout">
       <aside className="layout-sidebar">
         <div className="layout-marca">
-          <img
-            className="layout-marca-logo"
-            src="/logo-full.png"
-            alt="LabJá"
-          />
+          <img className="layout-marca-logo" src="/logo-full.png" alt="LabJá" />
         </div>
 
         {professor && (
@@ -41,13 +30,13 @@ export default function Layout({ children }) {
         )}
 
         <nav className="layout-nav">
-          <NavLink className={({ isActive }) => 'layout-nav-item' + (isActive ? ' layout-nav-item-ativo' : '')} to="/home">
-            <IconGrid size={19} />
+          <NavLink to="/home" className={({ isActive }) => 'layout-nav-item' + (isActive ? ' layout-nav-item-ativo' : '')}>
+            <IconCalendar size={19} />
             <span>Agenda</span>
           </NavLink>
-          {ehAdmin && (
-            <NavLink className={({ isActive }) => 'layout-nav-item' + (isActive ? ' layout-nav-item-ativo' : '')} to="/admin">
-              <span className="layout-nav-item-dot">●</span>
+          {professor?.eh_admin && (
+            <NavLink to="/admin" className={({ isActive }) => 'layout-nav-item' + (isActive ? ' layout-nav-item-ativo' : '')}>
+              <IconGrid size={19} />
               <span>Administração</span>
             </NavLink>
           )}

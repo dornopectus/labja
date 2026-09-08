@@ -18,7 +18,7 @@ export function obterAberturaMateria({ materia, prioridades = [], agora = new Da
   if (!materia || prioridades.length === 0) return null
 
   const registro = prioridades.find(
-    (item) => item.materia?.trim().toLocaleLowerCase() === materia.trim().toLocaleLowerCase()
+    (item) => item.disciplinas?.nome?.trim().toLocaleLowerCase() === materia.trim().toLocaleLowerCase()
   )
 
   const ordem = registro?.ordem_prioridade ?? null

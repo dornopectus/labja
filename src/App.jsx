@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Login from './pages/Login'
 import Home from './pages/Home'
-import RotaProtegida from './components/RotaProtegida'
 import Admin from './pages/Admin'
+import RotaProtegida from './components/RotaProtegida'
+import RotaAdmin from './components/RotaAdmin'
 
 function App() {
   return (
@@ -10,19 +11,19 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="/admin"
-          element={
-            <RotaProtegida>
-              <Admin />
-            </RotaProtegida>
-          }
-        />
-        <Route
           path="/home"
           element={
             <RotaProtegida>
               <Home />
             </RotaProtegida>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <RotaAdmin>
+              <Admin />
+            </RotaAdmin>
           }
         />
       </Routes>
