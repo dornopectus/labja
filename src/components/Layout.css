@@ -152,3 +152,5 @@
     display: none;
   }
 }
+
+.layout-nav-item-dot { font-size: 11px; width: 19px; display: inline-flex; justify-content: center; color: currentColor; }
