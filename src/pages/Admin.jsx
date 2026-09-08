@@ -57,7 +57,7 @@ export default function Admin() {
       supabase.from('laboratorios').select('id,nome,tipo_agendamento,capacidade,tipo_equipamento,exclusivo_curso_tecnico,ativo').order('nome'),
       supabase.from('prioridades_laboratorio').select('id,laboratorio_id,disciplina_id,ordem_prioridade,bloqueada,disciplinas(nome)').order('laboratorio_id').order('ordem_prioridade',{ascending:true}),
       supabase.from('horarios').select('id,dia_semana,hora_inicio,hora_fim').order('dia_semana').order('hora_inicio'),
-      supabase.from('agendamentos').select('id,laboratorio_id,professor_id,horario_id,turma_id,data_aula,periodo_referencia,status,criado_em,laboratorios(nome),professores(nome),turmas(nome),horarios(dia_semana,hora_inicio,hora_fim)').order('criado_em',{ascending:false}).limit(500),
+      supabase.from('agendamentos').select('id,laboratorio_id,professor_id,horario_id,turma_id,periodo_referencia,status,criado_em,laboratorios(nome),professores(nome),turmas(nome),horarios(dia_semana,hora_inicio,hora_fim)').order('criado_em',{ascending:false}).limit(500),
     ])
     const primeiroErro = resultados.find(r => r.error)?.error
     if (primeiroErro) setErro(erroTexto(primeiroErro, 'Não foi possível carregar os dados administrativos.'))

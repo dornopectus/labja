@@ -12,7 +12,7 @@ function App() {
         <Route
           path="/home"
           element={
-            <RotaProtegida tipoUsuario="professor">
+            <RotaProtegida>
               <Home />
             </RotaProtegida>
           }
@@ -20,7 +20,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <RotaProtegida tipoUsuario="admin">
+            <RotaProtegida>
               <Admin />
             </RotaProtegida>
           }
