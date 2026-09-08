@@ -3,15 +3,15 @@ import { obterDataHoraBrasilia } from './fusoBrasilia'
 
 // Referência para o cálculo das janelas quinzenais (Lab 2).
 // Ajustar se o coordenador definir uma data de início oficial diferente.
-const EPOCA_QUINZENAL = new Date(2026, 0, 5) // 5 de janeiro de 2026 (segunda-feira)
+const EPOCA_QUINZENAL = new Date(Date.UTC(2026, 0, 5)) // 5 de janeiro de 2026 (segunda-feira)
 
-// Monta a string 'YYYY-MM-DD' a partir dos componentes LOCAIS da data,
-// sem passar por toISOString() (que converte para UTC e pode empurrar
-// a data em 1 dia dependendo do fuso horário/horário do dia).
+// Monta uma string 'YYYY-MM-DD' a partir de uma data UTC.
+// Os cálculos usam UTC porque as datas aqui representam apenas calendário,
+// evitando depender do fuso do dispositivo.
 function paraISO(data) {
-  const ano = data.getFullYear()
-  const mes = String(data.getMonth() + 1).padStart(2, '0')
-  const dia = String(data.getDate()).padStart(2, '0')
+  const ano = data.getUTCFullYear()
+  const mes = String(data.getUTCMonth() + 1).padStart(2, '0')
+  const dia = String(data.getUTCDate()).padStart(2, '0')
   return `${ano}-${mes}-${dia}`
 }
 
@@ -28,8 +28,7 @@ export function periodoSemanalAtual(agora = agoraSincronizado()) {
 
   const diasDesdeSegunda = (diaSemana + 6) % 7 // segunda=0 ... domingo=6
 
-  const segunda = new Date(brasilia.ano, brasilia.mes - 1, brasilia.dia)
-  segunda.setDate(segunda.getDate() - diasDesdeSegunda + (jaResetou ? 7 : 0))
+  const segunda = new Date(Date.UTC(brasilia.ano, brasilia.mes - 1, brasilia.dia - diasDesdeSegunda + (jaResetou ? 7 : 0)))
 
   return paraISO(segunda)
 }
@@ -50,13 +49,12 @@ export function periodoSemanalAtual(agora = agoraSincronizado()) {
 export function periodoQuinzenalAtual(agora = agoraSincronizado()) {
   const semanaAtualISO = periodoSemanalAtual(agora)
   const [ano, mes, dia] = semanaAtualISO.split('-').map(Number)
-  const segundaAtual = new Date(ano, mes - 1, dia)
+  const segundaAtual = new Date(Date.UTC(ano, mes - 1, dia))
 
   const diffDias = Math.round((segundaAtual - EPOCA_QUINZENAL) / (1000 * 60 * 60 * 24))
   const blocos = Math.floor(diffDias / 14)
 
-  const inicioJanela = new Date(EPOCA_QUINZENAL)
-  inicioJanela.setDate(inicioJanela.getDate() + blocos * 14)
+  const inicioJanela = new Date(Date.UTC(2026, 0, 5 + blocos * 14))
 
   return paraISO(inicioJanela)
 }

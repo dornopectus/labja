@@ -3,43 +3,40 @@ import { supabase } from '../lib/supabaseClient'
 import { getProfessorLogado } from '../lib/auth'
 import { agoraSincronizado } from '../lib/horaServidor'
 import { periodoSemanalAtual } from '../lib/periodos'
+import { obterDataHoraBrasilia } from '../lib/fusoBrasilia'
 import { obterAberturaMateria, mensagemAberturaMateria } from '../lib/aberturaLaboratorios'
 
 const NOMES_DIA = { 1: 'Seg', 2: 'Ter', 3: 'Qua', 4: 'Qui', 5: 'Sex' }
 
-function formatarDataCurta(data) {
-  return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+function formatarDataCurtaISO(iso) {
+  if (!iso) return ''
+  const [, mes, dia] = iso.split('-')
+  return `${dia}/${mes}`
 }
-
 
 function formatarHora(hora) {
   return hora ? hora.slice(0, 5) : ''
 }
 
-// A partir da data de início do período (string 'YYYY-MM-DD', sempre
-// uma segunda-feira), calcula a data real de cada dia_semana (1=seg..5=sex).
-function dataDoDiaSemana(periodoInicioISO, diaSemana) {
-  const [ano, mes, dia] = periodoInicioISO.split('-').map(Number)
-  const data = new Date(ano, mes - 1, dia)
-  data.setDate(data.getDate() + (diaSemana - 1))
-  return data
-}
-
 function adicionarDiasISO(iso, dias) {
   const [ano, mes, dia] = iso.split('-').map(Number)
-  const data = new Date(ano, mes - 1, dia)
-  data.setDate(data.getDate() + dias)
-  const anoSaida = data.getFullYear()
-  const mesSaida = String(data.getMonth() + 1).padStart(2, '0')
-  const diaSaida = String(data.getDate()).padStart(2, '0')
-  return `${anoSaida}-${mesSaida}-${diaSaida}`
+  const data = new Date(Date.UTC(ano, mes - 1, dia + dias))
+  return data.toISOString().slice(0, 10)
 }
 
-function ehPassado(data) {
-  const hoje = agoraSincronizado()
-  const d = new Date(data.getFullYear(), data.getMonth(), data.getDate())
-  const h = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
-  return d < h
+function dataDoDiaSemana(periodoInicioISO, diaSemana) {
+  return adicionarDiasISO(periodoInicioISO, diaSemana - 1)
+}
+
+function hojeBrasiliaISO() {
+  const agora = obterDataHoraBrasilia(agoraSincronizado())
+  const mes = String(agora.mes).padStart(2, '0')
+  const dia = String(agora.dia).padStart(2, '0')
+  return `${agora.ano}-${mes}-${dia}`
+}
+
+function ehPassado(dataISO) {
+  return dataISO < hojeBrasiliaISO()
 }
 
 export default function AgendaSecao({
@@ -56,6 +53,7 @@ export default function AgendaSecao({
   colapsavel,
   abertaInicialmente = true,
   turmasDoProfessor = [],
+  diasPermitidos = [],
   aoReservar,
 }) {
   const professor = getProfessorLogado()
@@ -101,7 +99,7 @@ export default function AgendaSecao({
     async function carregar() {
       const { data, error } = await supabase
         .from('agendamentos')
-        .select('id, horario_id, turma_id, professor_id, turmas(nome)')
+        .select('id, horario_id, turma_id, professor_id, data_aula, turmas(nome)')
         .eq('laboratorio_id', laboratorioId)
         .eq('periodo_referencia', periodoReferencia)
         .eq('status', 'confirmado')
@@ -123,6 +121,18 @@ export default function AgendaSecao({
 
   async function abrirReserva(horarioId) {
     const laboratorio = laboratorios.find((lab) => lab.id === laboratorioId)
+    const horarioSelecionado = horarios.find((item) => item.id === horarioEmReserva)
+    if (!horarioSelecionado || !diasPermitidos.includes(Number(horarioSelecionado.dia_semana))) {
+      window.alert('Você não pode reservar nesse dia, pois ele não está cadastrado como seu dia de aula.')
+      setHorarioEmReserva(null)
+      return
+    }
+
+    const turmaSelecionada = turmasDoProfessor.find((item) => item.id === turmaEscolhida)
+    if (laboratorio && turmaSelecionada?.quantidade_estudantes != null && Number(turmaSelecionada.quantidade_estudantes) > Number(laboratorio.capacidade)) {
+      window.alert(`A turma possui ${turmaSelecionada.quantidade_estudantes} estudantes, mas o laboratório comporta ${laboratorio.capacidade}.`)
+      return
+    }
 
     if (laboratorio?.tipo_agendamento === 'semanal' && professor?.materia && laboratorioId) {
       const prioridadesAtuais = await carregarPrioridadesLaboratorio()
@@ -138,6 +148,12 @@ export default function AgendaSecao({
       }
     }
 
+    const horario = horarios.find((item) => item.id === horarioId)
+    if (!horario || !diasPermitidos.includes(Number(horario.dia_semana))) {
+      window.alert('Você não pode reservar nesse dia, pois ele não está cadastrado como seu dia de aula.')
+      return
+    }
+
     setTurmaEscolhida(turmasDoProfessor[0]?.id ?? '')
     setHorarioEmReserva(horarioId)
   }
@@ -146,6 +162,18 @@ export default function AgendaSecao({
     if (!turmaEscolhida) return
 
     const laboratorio = laboratorios.find((lab) => lab.id === laboratorioId)
+    const horarioSelecionado = horarios.find((item) => item.id === horarioEmReserva)
+    if (!horarioSelecionado || !diasPermitidos.includes(Number(horarioSelecionado.dia_semana))) {
+      window.alert('Você não pode reservar nesse dia, pois ele não está cadastrado como seu dia de aula.')
+      setHorarioEmReserva(null)
+      return
+    }
+
+    const turmaSelecionada = turmasDoProfessor.find((item) => item.id === turmaEscolhida)
+    if (laboratorio && turmaSelecionada?.quantidade_estudantes != null && Number(turmaSelecionada.quantidade_estudantes) > Number(laboratorio.capacidade)) {
+      window.alert(`A turma possui ${turmaSelecionada.quantidade_estudantes} estudantes, mas o laboratório comporta ${laboratorio.capacidade}.`)
+      return
+    }
 
     if (laboratorio?.tipo_agendamento === 'semanal' && professor?.materia && laboratorioId) {
       const prioridadesAtuais = await carregarPrioridadesLaboratorio()
@@ -199,9 +227,10 @@ export default function AgendaSecao({
         professor_id: professor?.id,
         horario_id: horarioEmReserva,
         turma_id: turmaEscolhida,
+        data_aula: dataDoDiaSemana(periodoParaExibirDatas, Number(horarioSelecionado.dia_semana)),
         periodo_referencia: periodoReferencia,
       })
-      .select('id, horario_id, turma_id, professor_id, turmas(nome)')
+      .select('id, horario_id, turma_id, professor_id, data_aula, turmas(nome)')
       .single()
 
     if (error) {
@@ -230,13 +259,12 @@ export default function AgendaSecao({
 
   if (laboratorios.length === 0) return null
 
-  const diasComHorario = [...new Set(horarios.map((h) => h.dia_semana))].sort()
-  const faixasHorarias = [...new Map(
+  const diasComHorario = [...new Set(horarios.map((h) => Number(h.dia_semana)).filter((dia) => dia >= 1 && dia <= 5))].sort((a, b) => a - b)
+  const chavesHorarios = [...new Set(
     horarios
-      .slice()
-      .sort((a, b) => String(a.hora_inicio).localeCompare(String(b.hora_inicio)))
-      .map((h) => [`${h.hora_inicio}|${h.hora_fim}`, { hora_inicio: h.hora_inicio, hora_fim: h.hora_fim }])
-  ).values()]
+      .filter((h) => Number(h.dia_semana) >= 1 && Number(h.dia_semana) <= 5)
+      .map((h) => `${h.hora_inicio}|${h.hora_fim}`)
+  )].sort()
   const ehPrioritario = laboratorioId === laboratorioPrioritarioId
 
   return (
@@ -318,21 +346,20 @@ export default function AgendaSecao({
                     return (
                       <th key={dia}>
                         {NOMES_DIA[dia]}
-                        {data && <span style={{ fontWeight: 400 }}> {formatarDataCurta(data)}</span>}
+                        {data && <span style={{ fontWeight: 400 }}> {formatarDataCurtaISO(data)}</span>}
                       </th>
                     )
                   })}
                 </tr>
               </thead>
               <tbody>
-                {faixasHorarias.map((faixa) => {
+                {chavesHorarios.map((chave) => {
+                  const [inicio, fim] = chave.split('|')
                   return (
-                    <tr key={`${faixa.hora_inicio}|${faixa.hora_fim}`}>
-                      <td>
-                        {formatarHora(faixa.hora_inicio)} – {formatarHora(faixa.hora_fim)}
-                      </td>
+                    <tr key={chave}>
+                      <td>{formatarHora(inicio)} – {formatarHora(fim)}</td>
                       {diasComHorario.map((dia) => {
-                        const horario = horarios.find((h) => h.dia_semana === dia && h.hora_inicio === faixa.hora_inicio && h.hora_fim === faixa.hora_fim)
+                        const horario = horarios.find((h) => Number(h.dia_semana) === dia && `${h.hora_inicio}|${h.hora_fim}` === chave)
                         if (!horario) return <td key={dia}>—</td>
 
                         const dataColuna =
@@ -342,8 +369,12 @@ export default function AgendaSecao({
                             ? dataDoDiaSemana(periodoParaExibirDatas, dia)
                             : null
                         const colunaPassada = dataColuna && ehPassado(dataColuna)
+                        const diaPermitido = diasPermitidos.includes(dia)
 
-                        const agendamento = agendamentos.find((a) => a.horario_id === horario.id)
+                        const agendamento = agendamentos.find((a) => {
+                          if (a.horario_id !== horario.id) return false
+                          return !a.data_aula || a.data_aula === dataColuna
+                        })
                         const ehMinha = agendamento && agendamento.professor_id === professor?.id
 
                         return (
@@ -363,8 +394,13 @@ export default function AgendaSecao({
                               ) : (
                                 <span className="agenda-celula-ocupada">{agendamento.turmas?.nome}</span>
                               )
-                            ) : colunaPassada ? (
-                              <span style={{ color: 'var(--tinta-fraca)', fontSize: '0.78rem' }}>—</span>
+                            ) : colunaPassada || !diaPermitido ? (
+                              <span
+                                title={!diaPermitido && !colunaPassada ? 'Este dia não está cadastrado como seu dia de aula.' : undefined}
+                                style={{ color: 'var(--tinta-fraca)', fontSize: '0.78rem' }}
+                              >
+                                —
+                              </span>
                             ) : (
                               <button className="agenda-celula-livre" onClick={() => abrirReserva(horario.id)}>
                                 Reservar

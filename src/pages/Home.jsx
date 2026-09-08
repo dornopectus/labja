@@ -18,6 +18,7 @@ export default function Home() {
   const [laboratorioPrioritarioId, setLaboratorioPrioritarioId] = useState(null)
   const [laboratorioPrioritarioQuinzenalId, setLaboratorioPrioritarioQuinzenalId] = useState(null)
   const [turmasDoProfessor, setTurmasDoProfessor] = useState([])
+  const [diasDoProfessor, setDiasDoProfessor] = useState([])
   const [reservas, setReservas] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
@@ -36,7 +37,7 @@ export default function Home() {
     const { data } = await supabase
       .from('agendamentos')
       .select(
-        'id, turma_id, periodo_referencia, laboratorios(nome), turmas(nome), horarios(dia_semana, hora_inicio, hora_fim)'
+        'id, turma_id, data_aula, periodo_referencia, laboratorios(nome), turmas(nome), horarios(dia_semana, hora_inicio, hora_fim)'
       )
       .eq('professor_id', professor.id)
       .eq('status', 'confirmado')
@@ -111,12 +112,23 @@ export default function Home() {
       }
 
       if (professor?.id) {
-        const { data: turmas } = await supabase
-          .from('professor_turmas')
-          .select('turmas(id, nome)')
-          .eq('professor_id', professor.id)
+        const [{ data: turmas }, { data: dias }] = await Promise.all([
+          supabase
+            .from('professor_turmas')
+            .select('turmas(id, nome, quantidade_estudantes)')
+            .eq('professor_id', professor.id),
+          supabase
+            .from('professor_dias_aula')
+            .select('dia_semana')
+            .eq('professor_id', professor.id)
+        ])
 
         setTurmasDoProfessor((turmas || []).map((t) => t.turmas).filter(Boolean))
+        setDiasDoProfessor(
+          [...new Set((dias || []).map((item) => Number(item.dia_semana)))]
+            .filter((dia) => dia >= 1 && dia <= 5)
+            .sort((a, b) => a - b)
+        )
       }
 
       setCarregando(false)
@@ -166,6 +178,7 @@ export default function Home() {
                   mostrarAbasSemana
                   aoReservar={carregarReservas}
                   turmasDoProfessor={turmasDoProfessor}
+                  diasPermitidos={diasDoProfessor}
                 />
 
                 <AgendaSecao
@@ -181,6 +194,7 @@ export default function Home() {
                   abertaInicialmente={false}
                   aoReservar={carregarReservas}
                   turmasDoProfessor={turmasDoProfessor}
+                  diasPermitidos={diasDoProfessor}
                 />
               </>
             ) : (
@@ -195,6 +209,7 @@ export default function Home() {
                 mostrarDatasReais
                 aoReservar={carregarReservas}
                 turmasDoProfessor={turmasDoProfessor}
+                diasPermitidos={diasDoProfessor}
               />
             )}
 
@@ -212,7 +227,7 @@ export default function Home() {
                         <span className="dash-reserva-detalhe">{r.laboratorios?.nome}</span>
                       </div>
                       <span className="dash-reserva-quando">
-                        {DIAS[r.horarios?.dia_semana]} · {r.horarios?.hora_inicio?.slice(0,5)}–{r.horarios?.hora_fim?.slice(0,5)}
+                        {DIAS[r.horarios?.dia_semana]} · {r.horarios?.hora_inicio?.slice(0, 5)}–{r.horarios?.hora_fim?.slice(0, 5)}
                       </span>
                     </div>
                   ))}
