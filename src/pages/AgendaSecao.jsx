@@ -231,7 +231,12 @@ export default function AgendaSecao({
   if (laboratorios.length === 0) return null
 
   const diasComHorario = [...new Set(horarios.map((h) => h.dia_semana))].sort()
-  const blocos = [...new Set(horarios.map((h) => h.bloco))]
+  const faixasHorarias = [...new Map(
+    horarios
+      .slice()
+      .sort((a, b) => String(a.hora_inicio).localeCompare(String(b.hora_inicio)))
+      .map((h) => [`${h.hora_inicio}|${h.hora_fim}`, { hora_inicio: h.hora_inicio, hora_fim: h.hora_fim }])
+  ).values()]
   const ehPrioritario = laboratorioId === laboratorioPrioritarioId
 
   return (
@@ -320,15 +325,14 @@ export default function AgendaSecao({
                 </tr>
               </thead>
               <tbody>
-                {blocos.map((bloco) => {
-                  const horarioRepresentativo = horarios.find((h) => h.bloco === bloco)
+                {faixasHorarias.map((faixa) => {
                   return (
-                    <tr key={bloco}>
+                    <tr key={`${faixa.hora_inicio}|${faixa.hora_fim}`}>
                       <td>
-                        {formatarHora(horarioRepresentativo?.hora_inicio)} – {formatarHora(horarioRepresentativo?.hora_fim)}
+                        {formatarHora(faixa.hora_inicio)} – {formatarHora(faixa.hora_fim)}
                       </td>
                       {diasComHorario.map((dia) => {
-                        const horario = horarios.find((h) => h.dia_semana === dia && h.bloco === bloco)
+                        const horario = horarios.find((h) => h.dia_semana === dia && h.hora_inicio === faixa.hora_inicio && h.hora_fim === faixa.hora_fim)
                         if (!horario) return <td key={dia}>—</td>
 
                         const dataColuna =
