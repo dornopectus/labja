@@ -52,6 +52,12 @@ function ehPassado(data) {
   return a < b
 }
 
+function dataISO(data) {
+  if (!data) return null
+  if (typeof data === 'string') return data.slice(0, 10)
+  return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`
+}
+
 export default function AgendaSecao({
   titulo,
   tagClasse,
@@ -388,10 +394,12 @@ export default function AgendaSecao({
                             : null
                         const colunaPassada = dataColuna && ehPassado(dataColuna)
 
+                        const dataColunaISO = dataISO(dataColuna)
                         const agendamento = agendamentos.find((a) => {
-          if (a.horario_id !== horario.id) return false
-          return !a.data_aula || a.data_aula === dataColuna
-        })
+                          if (a.horario_id !== horario.id) return false
+                          if (!a.data_aula) return true
+                          return dataISO(a.data_aula) === dataColunaISO
+                        })
                         const ehMinha = agendamento && agendamento.professor_id === professor?.id
                         const diaPermitido = diasPermitidos.has(Number(horario.dia_semana))
 
